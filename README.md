@@ -1,4 +1,3 @@
-markdown
 # Health Diagnosis Plugin
 
 ## Overview
