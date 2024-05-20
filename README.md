@@ -46,7 +46,7 @@ To set up the project for development, follow these steps:
 
 1. Clone the repository:
    ```sh
-   git clone <repository-url>
+   git clone https://github.com/mfoud5391/health-diagnosis-plugin.git
    ```
 2. Navigate to the frontend directory:
    ```sh
