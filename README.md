@@ -3,16 +3,41 @@
 ## Overview
 The Health Diagnosis Plugin is a WordPress plugin combined with a Vue.js frontend to detect plant diseases using artificial intelligence. This plugin leverages Naive UI, a Vue 3 Component Library, and TypeScript to deliver a seamless and interactive user experience. The backend is developed in PHP to integrate smoothly with WordPress, allowing the use of shortcodes to embed the plugin on any page of your website.
 
-## Table of Contents
+### Table of Contents
+- [Features](#features)
+  - [Plugin Features](#plugin-features)
+  - [Admin Features](#admin-features)
 - [Installation](#installation)
   - [Developer Setup](#developer-setup)
   - [Building the Project](#building-the-project)
   - [Setting up in WordPress](#setting-up-in-wordpress)
 - [Usage](#usage)
 - [Shortcodes](#shortcodes)
-- [Admin Features](#admin-features)
 - [Support](#support)
 - [License](#license)
+
+
+
+
+## Features
+
+### Plugin
+
+- AI-based plant disease detection
+- Seamless integration with WordPress
+- Modern Vue.js frontend
+- User-friendly interface with Naive UI components
+- Shortcode functionality for easy embedding in WordPress pages or posts
+- Support for both Arabic and English languages
+
+### Admin Features
+
+Admins have access to a dedicated tab "AI Detection" in the WordPress dashboard where they can:
+
+- Manage plants and diseases.
+- Manage AI models.
+- View user process history.
+
 
 ## Installation
 
@@ -70,7 +95,7 @@ To build the project for production:
 4. In `app_vue.php`, comment out the development server script line and replace it with the production files , show following example:
    ```php
    <!-- <script type="module" src="http://localhost:3006/src/main.ts"></script> -->
-  <script type="module" crossorigin src="<?php echo plugin_dir_url(__FILE__) . 'frontend/dist/assets/index-41f7c117.js' ?>"></script>
+    <script type="module" crossorigin src="<?php echo plugin_dir_url(__FILE__) . 'frontend/dist/assets/index-41f7c117.js' ?>"></script>
    <link rel="stylesheet" href="<?php echo plugin_dir_url(__FILE__) . 'frontend/dist/assets/index-a06995a4.css'; ?>
    ```
 
@@ -95,12 +120,6 @@ You can use the following shortcode to embed the detection feature on any page o
 ```sh
 [detectionai_shortcode]
 ```
-
-## Admin Features
-Admins have access to a dedicated tab "AI Detection" in the WordPress dashboard where they can:
-- Manage plants and diseases.
-- Manage AI models.
-- View user process history.
 
 ## Support
 ## Support
