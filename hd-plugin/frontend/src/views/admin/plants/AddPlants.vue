@@ -12,7 +12,7 @@ const message = useMessage();
 const formRef = ref<FormInst | null>(null);
 const loading = ref(false);
 const model = ref<Dashboard.Plant>({
-  image_url: '',
+  image: '',
   name:'',
   status: true,
   createdAt: '',
@@ -22,7 +22,10 @@ const model = ref<Dashboard.Plant>({
 });
 const formData = new FormData();
 const rules = {
-  image: [{ required: true, message: t('university.imageRequired'), trigger: ['input', 'blur'] }],
+  name: [{ required: true, message: t('common.nameRequired'), trigger: ['input', 'blur'] }],
+  translations: [{ required: true, message: t('dashboard.nameDiseasesRequired'), trigger: ['input', 'blur'] }],
+  image: [{ required: true, message: t('common.imageRequired'), trigger: ['input', 'blur'] }],
+
 };
 
 async function handleAdded() {
@@ -31,7 +34,7 @@ async function handleAdded() {
     formData.append('status', model.value.status.toString());
     formData.append('language_codes', JSON.stringify(model.value.languageCodes));
     formData.append('translations', JSON.stringify(model.value.translations)); 
-    model.value.name = model.value.translations[language.name === 'ar-DZ' ? 1 : 0];
+    model.value.name = model.value.translations[language.value.name === 'ar-DZ' ? 1 : 0];
     await dashboardStore.insertActionPlant(model.value, formData);
     loading.value = false;
     message.success(t('common.addSuccess'));
@@ -47,7 +50,7 @@ const customRequest = async ({ file, data, onProgress, onFinish, onError }: Uplo
   try {
     if (file.file !== null) {
       formData.append('image', file.file);
-      model.value.image_url = file.file
+      model.value.image = file.file
     }
     onFinish()
   } catch (error: any) {
@@ -58,7 +61,15 @@ const customRequest = async ({ file, data, onProgress, onFinish, onError }: Uplo
 }
 
 function isButtonDisabled() {
-  return false
+  if (
+ 
+    model.value.translations[0] === '' ||
+    model.value.translations[1] === '' ||
+    !model.value.image 
+  ) {
+    return true;
+  }
+  return false;
 }
 </script>
 
@@ -70,7 +81,7 @@ function isButtonDisabled() {
     <NForm ref="formRef" :model="model" :rules="rules" size="large">
       <div>
         <NGrid :cols="4" :span="24" :x-gap="24">
-          <NFormItemGi :span="12" path="image" :label="t('university.image')">
+          <NFormItemGi :span="12" path="image" :label="t('common.image')">
             <NUpload accept="image/*" list-type="image-card" :max=1 path="image" :custom-request="customRequest">
             </NUpload>
           </NFormItemGi>
@@ -81,7 +92,7 @@ function isButtonDisabled() {
                v-model:value="model.translations[index]" :placeholder="t('dashboard.namePlant')" clearable @keyup.enter="handleAdded" />
             </NFormItemGi>
           </template>
-          <NFormItemGi :span="12" path="state" :label="t('university.state')">
+          <NFormItemGi :span="12" path="state" :label="t('common.state')">
             <NSwitch v-model:value="model.status" size="large" />
           </NFormItemGi>
         </NGrid>

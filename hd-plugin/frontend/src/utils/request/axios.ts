@@ -1,6 +1,6 @@
 import axios, { type AxiosResponse } from 'axios'
 import applyCaseMiddleware from 'axios-case-converter';
-// const host = "http://localhost/wordpress/"
+// export const host = "http://localhost/wordpress65/"
 export const host = "https://worldofplants.ai/"
 export const baseURL = host + "wp-json/wphd/v2/"
 export const baseImageUrl = host +  "wp-content/plugins/wp-health-diagnosis-plugin/hd-plugin/frontend/dist/assets/"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VNodeChild, h, ref } from 'vue';
+import { VNodeChild, computed, h, ref, watch } from 'vue';
 import { NForm, NInput, NButton, FormInst, UploadCustomRequestOptions, SelectOption, NAvatar, UploadFileInfo } from 'naive-ui';
 import { t } from '@/locales';
 import { useMessage, NGrid, NFormItemGi, NUpload, NSwitch, NSelect } from 'naive-ui';
@@ -18,54 +18,20 @@ const props = defineProps<Props>()
 
 
 const formData = new FormData();
-const initialModelRef = ref<Dashboard.Diseases>({
-    id:props.row.id,
-    plantId:props.row.plantId,
-    name: props.row.name,
-    status: props.row.status,
-    image: props.row.image,
-    keyLabel:props.row.keyLabel,
-    image_url : props.row.image_url,
-    description:props.row.description,
-    healthCondition:props.row.healthCondition,
-    languageCodes: props.row.languageCodes,
-    translationsName: props.row.translationsName,
-    translationsDescription: props.row.translationsDescription,
-    translationsHealthCondition: props.row.translationsHealthCondition,
-    createdAt: props.row.createdAt,
-    updatedAt: props.row.updatedAt,
-});
-
-const model = ref<Dashboard.Diseases>({
-    id:props.row.id,
-    plantId:props.row.plantId,
-    name: props.row.name,
-    status: props.row.status,
-    image: props.row.image,
-    image_url: props.row.image_url,
-    description:props.row.description,
-    keyLabel:props.row.keyLabel,
-    healthCondition:props.row.healthCondition,
-    languageCodes: props.row.languageCodes,
-    translationsName: props.row.translationsName,
-    translationsDescription: props.row.translationsDescription,
-    translationsHealthCondition: props.row.translationsHealthCondition,
-    createdAt: props.row.createdAt,
-    updatedAt: props.row.updatedAt,
-});
-
+const initialModelRef = ref<Dashboard.Diseases>({ ...props.row });
+const model = ref<Dashboard.Diseases>({ ...props.row });
 
 
 const rules = {
-  name: [{ required: true, message: t('university.nameRequired'), trigger: ['input', 'blur'] }],
-  plant: [{ required: true, message: t('university.countryRequired') }],
-  image: [{ required: true, message: t('university.imageRequired'), trigger: ['input', 'blur'] }],
+  name: [{ required: true, message: t('common.nameRequired'), trigger: ['input', 'blur'] }],
+  plant: [{ required: true, message: t('common.plantRequired') }],
+  image: [{ required: true, message: t('common.imageRequired'), trigger: ['input', 'blur'] }],
   healthCondition: [{ required: true, message: t('fashboard.healthConditionRequired'), trigger: ['input', 'blur'] }],
   description: [{ required: true, message: t('dashboard.descriptionRequired'), trigger: ['input', 'blur'] }],
 
 };
 const selectOption = dashboardStore.listPlants.map(plant => ({
-  label: plant.translations[language.name === 'ar-DZ' ? 0 : 1],
+  label: plant.translations[language.value.name === 'ar-DZ' ? 1 : 0],
   value: plant.id,
   disabled: false,
 }));
@@ -79,9 +45,10 @@ async function handleAdded() {
     formData.append('translations_description', JSON.stringify(model.value.translationsDescription)); 
     formData.append('translations_health_condition', JSON.stringify(model.value.translationsHealthCondition)); 
     formData.append('status', model.value.status.toString()); 
-    model.value.name = model.value.translationsName[language.name === 'ar-DZ' ? 0 : 1];
-    model.value.description = model.value.translationsDescription[language.name === 'ar-DZ' ? 0 : 1];
-    model.value.healthCondition = model.value.translationsHealthCondition[language.name === 'ar-DZ' ? 0 : 1];
+    formData.append('productIds', JSON.stringify(model.value.productIds));
+    model.value.name = model.value.translationsName[language.value.name === 'ar-DZ' ? 1 : 0];
+    model.value.description = model.value.translationsDescription[language.value.name === 'ar-DZ' ? 1 : 0];
+    model.value.healthCondition = model.value.translationsHealthCondition[language.value.name === 'ar-DZ' ? 1 : 0];
     
     await dashboardStore.updateActionDisease(model.value, formData);
     loading.value = false;
@@ -171,6 +138,136 @@ const previewFileList = ref<UploadFileInfo[]>([
         url: model.value.image
     },
 ])
+
+
+
+
+import {  NText, NTag, SelectRenderTag, SelectRenderLabel } from 'naive-ui'
+import { get } from '@/utils/request'
+
+const loadingSearch = ref(false)
+const options = ref<SelectOption[]>(
+  model.value.productIds && model.value.productIds.length > 0 
+    ? model.value.products.map(product => ({
+        label: product.name,
+        value: product.id,
+        image: product.image,
+        description: product.description
+      }))
+    : []
+);
+
+
+
+
+const renderMultipleSelectTag: SelectRenderTag = ({ option, handleClose }) => {
+ 
+  return h(
+    NTag,
+    {
+      style: {
+        padding: '0 6px 0 4px'
+      },
+      round: true,
+      closable: true,
+      onClose: (e) => {
+        e.stopPropagation()
+        handleClose()
+      }
+    },
+    {
+      default: () =>
+        h(
+          'div',
+          {
+            style: {
+              display: 'flex',
+              alignItems: 'center'
+            }
+          },
+          [
+            h(NAvatar, {
+              src: option.image,
+              round: true,
+              size: 22,
+              style: {
+                marginRight: '4px'
+              }
+            }),
+            option.label
+          ]
+        )
+    }
+  )
+}
+
+const renderLabelProduct: SelectRenderLabel = (option) => {
+  return h(
+    'div',
+    {
+      style: {
+        display: 'flex',
+        alignItems: 'center'
+      }
+    },
+    [
+      h(NAvatar, {
+        src: option.image,
+        round: true,
+        size: 'small'
+      }),
+      h(
+        'div',
+        {
+          style: {
+            marginLeft: '12px',
+            padding: '4px 0'
+          }
+        },
+        [
+          h('div', null, [option.label]),
+          h(
+            NText,
+            { depth: 3, tag: 'div' },
+            {
+              default: () => option.description
+            }
+          )
+        ]
+      )
+    ]
+  )
+}
+
+async function handleSearch(query: string) {
+  try {
+    if (!query.length) {
+      options.value = []
+      return
+    }
+    loadingSearch.value = true
+    const   data = {
+        'search': query 
+        
+        }
+    const response = await get<any[]>({ url: 'product-search/', data})
+    console.log("options.value", response)
+    options.value = response.map(product => ({
+      label: product.name,
+      value: product.id,
+      image: product.image,
+      description: product.description
+    }))
+    loadingSearch.value = false
+  } catch (error: any) {
+    loadingSearch.value = false
+    console.log("error", error)
+    throw error
+  }
+}
+
+
+
 </script>
 
 <template>
@@ -187,11 +284,7 @@ const previewFileList = ref<UploadFileInfo[]>([
    
     >
       <div>
-        <NGrid
-          :cols="4"
-          :span="24"
-          :x-gap="24"
-        >
+        <NGrid :span="24" :x-gap="24">
 
         <NFormItemGi
               :span="12"
@@ -212,7 +305,7 @@ const previewFileList = ref<UploadFileInfo[]>([
           <NFormItemGi
             :span="12"
             path="image"
-            :label="t('university.image')"
+            :label="t('common.image')"
           >
             <NUpload
               accept="image/*"
@@ -277,13 +370,33 @@ const previewFileList = ref<UploadFileInfo[]>([
           <NFormItemGi
             :span="12"
             path="state"
-            :label="t('university.state')"
+            :label="t('common.state')"
           >
             <NSwitch
               v-model:value="model.status"
               size="large"
             />
           </NFormItemGi>
+
+
+          <NFormItemGi :span="24" path="products" :label="t('common.products')">
+
+          <NSelect
+    multiple
+    :options="options"
+    :render-label="renderLabelProduct"
+    :render-tag="renderMultipleSelectTag"
+    filterable
+
+    v-model:value="model.productIds"
+    :placeholder="t('common.searchProducts')"
+    :loading="loadingSearch"
+    clearable
+    remote
+    :clear-filter-after-select="false"
+    @search="handleSearch"
+  />
+        </NFormItemGi>
 
         </NGrid>
       </div>

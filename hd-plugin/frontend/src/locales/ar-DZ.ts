@@ -28,7 +28,10 @@ export default {
     totalPlant: 'إجمالي النباتات',
     totalDiseases: 'إجمالي الأمراض',
     totalModel: 'إجمالي النماذج',
-    totalOperation: 'إجمالي العمليات'
+    totalOperation: 'إجمالي العمليات',
+    idUser: 'معرف المستخدم',
+    result: 'النتيجة',
+    picture: 'صورة',
   },
   app: {
     start: 'بدء',
@@ -54,7 +57,9 @@ export default {
     description: 'قم بتعزيز مساعيك الزراعية باستخدام تقنية الذكاء الاصطناعي المتطورة المصممة لإحداث ثورة في طريقة اكتشاف أمراض النباتات وإدارتها. يسخر نظامنا قوة الخوارزميات المتقدمة والتعلم الآلي لتوفير معلومات دقيقة عن الأمراض النباتية المختلفة. بدءًا من الالتهابات الفطرية الشائعة وحتى الأمراض الفيروسية بعيدة المنال، توفر منصتنا المعتمدة على الذكاء الاصطناعي تغطية شاملة، مما يتيح الاكتشاف المبكر والتدخل الاستباقي.',
 
     healthStatus: 'الحالة الصحية',
-    descriptionOfTheDisease: "وصف المرض"
+    descriptionOfTheDisease: "وصف المرض",
+ 
+    actions: 'إجراءات'
   },
   common: {
     addToCart:'إضافة إلى السلة',
@@ -103,6 +108,15 @@ export default {
     general: 'عام',
     start: 'إبدا الان',
     back:'عودة',
+
+    imageRequired: 'الصورة مطلوبة',
+    nameRequired: 'الاسم مطلوب',
+    plantRequired: 'النبات مطلوب',
+    deleteConfirmation: 'تأكيد الحذف',
+    deleteConfirmationMessage: 'هل أنت متأكد أنك تريد حذف هذا العنصر؟',
+    searchProducts: 'ابحث عن المنتجات',
+    products: 'المنتجات',
+    notFoundAnyProduct: 'لم يتم العثور على أي منتج',
   },
   
   setting: {

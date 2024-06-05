@@ -109,7 +109,7 @@ const columns = reactive<DataTableColumns<Dashboard.Diseases>>([
   mainColumn1,
   mainColumn2,
   {
-    title: t('research.actions'),
+    title: t('app.actions'),
     key: 'actions',
     align: 'center',
     width: 100,

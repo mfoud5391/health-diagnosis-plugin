@@ -5,4 +5,3 @@ interface Window {
   $notification?: import('naive-ui').NotificationProviderInst;
 }
 
-declare module 'vue-speech';

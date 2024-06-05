@@ -14,7 +14,7 @@ interface Props {
 const props = defineProps<Props>()
 const row = computed(() => props.row)
 const imageUrl = computed(() => row.value.image)
-const name = computed(() => row.value.translationsName[language.name === 'ar-DZ' ? 0 : 1])
+const name = computed(() => row.value.translationsName[language.value.name === 'ar-DZ' ? 1 : 0])
 
 const badgeType = row.value.status ? 'success' : 'error';
 const { isMobile } = useBasicLayout()

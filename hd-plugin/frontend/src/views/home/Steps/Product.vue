@@ -1,7 +1,7 @@
 <script setup lang='ts'>
-import { ref, computed } from 'vue'
+import {  computed } from 'vue'
 import { t } from '@/locales';
-import { NImage, NButton, NBadge } from 'naive-ui'
+import { NImage,  NBadge } from 'naive-ui'
 
 interface Props {
     row: Dashboard.Product
@@ -13,7 +13,7 @@ const badgeSales = row.value.onSale ? 'Sales' : '';
 
 </script>
 <template>
-    <div class=" flex flex-col  bg-green-50 rounded-lg items-center gap-4">
+    <div class=" flex flex-col p-4 max-w-[370px]  bg-green-200 rounded-lg items-center gap-4">
 
         <NBadge :value="badgeSales" :processing=false type="warning">
             <NImage class="rounded-lg slide-in-fwd-center" width="250" height="250" lazy :src="row.image"
@@ -27,9 +27,9 @@ const badgeSales = row.value.onSale ? 'Sales' : '';
         </NBadge>
 
         <div class=" font-bold text-xl">{{ row.name }}</div>
-        <div class=" font-bold text-xl" v-html="row.priceHtml"></div>
+        <div class=" font-bold text-xl text-left" v-html="row.priceHtml"></div>
 
-        <a :href="row.permalink" class="no-underline rounded-lg p-2 font-bold text-center w-64 text-white hover:text-yellow-300 cursor-pointer" style="background-color: #208000;">
+        <a :href="row.permalink" class="no-underline rounded-lg p-2  mx-4  font-bold text-center w-52 text-white hover:text-yellow-300 cursor-pointer" style="background-color: #208000;">
       {{ t('common.addToCart') }}
     </a>
 

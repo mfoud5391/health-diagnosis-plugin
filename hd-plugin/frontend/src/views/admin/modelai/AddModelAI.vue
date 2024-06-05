@@ -1,11 +1,8 @@
-<script
-  setup
-  lang="ts"
->
-import { VNodeChild, h, ref } from 'vue';
-import { NForm, NInput, NButton, FormInst, NAvatar, SelectOption} from 'naive-ui';
+<script setup lang="ts">
+import { VNodeChild, computed, h, ref } from 'vue';
+import { NForm, NInput, NButton, FormInst, NAvatar, SelectOption, NInputGroup, NInputGroupLabel } from 'naive-ui';
 import { t } from '@/locales';
-import { useMessage, NGrid, NFormItemGi, NSelect} from 'naive-ui';
+import { useMessage, NGrid, NFormItemGi, NSelect } from 'naive-ui';
 import { useDashboardStore } from '@/store'
 const dashboardStore = useDashboardStore()
 import { useLanguage } from '@/hooks/useLanguage'
@@ -16,29 +13,30 @@ const formRef = ref<FormInst | null>(null);
 const loading = ref(false);
 const model = ref<Dashboard.ModelAI>({
   name: '',
-githubUrl:'https://github.com/shahd1995913/models_world_of_plants_2022/blob/main/Orange_leaves/model',
-description:'',
-version: '',
+  githubUrl: '',
+  description: '',
+  version: '',
   status: true,
   createdAt: '',
   updatedAt: '',
 });
 
 const selectOption = dashboardStore.listPlants.map(plant => ({
-  label: plant.translations[language.name === 'ar-DZ' ? 0 : 1],
+  label: plant.translations[language.name === 'ar-DZ' ? 1 : 0],
   value: plant.id,
   disabled: false,
 }));
 
 const formData = new FormData();
 const rules = {
-    name: [{ required: true, message: t('university.nameRequired'), trigger: ['input', 'blur'] }],
-    modelAIGithub: [{ required: true, message: t('dashboard.urlRequired'), trigger: ['input', 'blur'] }],
+  name: [{ required: true, message: t('common.nameRequired'), trigger: ['input', 'blur'] }],
+  plantId: [{ required: true, message: t('common.plantRequired'), trigger: ['input', 'blur'] }],
+  githubUrl: [{ required: true, message: t('dashboard.urlRequired'), trigger: ['input', 'blur'] }],
 };
 async function handleAdded() {
   try {
     loading.value = true;
-    formData.append('plantId', model.value.plantId); 
+    formData.append('plantId', model.value.plantId);
     formData.append('name', model.value.name);
     formData.append('status', model.value.status);
     formData.append('githubUrl', model.value.githubUrl);
@@ -57,7 +55,18 @@ async function handleAdded() {
 
 
 function isButtonDisabled() {
-  return !model.value.githubUrl ||loading.value
+  if (
+    model.value.name === '' ||
+    model.value.githubUrl === '' ||
+   
+    !model.value.plantId  ||
+
+  githubUrlStatus.value === 'error'
+  
+  ) {
+    return true;
+  }
+  return false;
 }
 
 const renderLabel: (option: SelectOption) => VNodeChild = (option) => {
@@ -71,13 +80,13 @@ const renderLabel: (option: SelectOption) => VNodeChild = (option) => {
     },
     [
       h(NAvatar, {
-                  src: dashboardStore.listPlants.find((plant) =>plant.id === option.value)?.image,
-                  round: true,
-                  size: 22,
-                  style: {
-                    marginRight: '4px'
-                  }
-                }),
+        src: dashboardStore.listPlants.find((plant) => plant.id === option.value)?.image,
+        round: true,
+        size: 22,
+        style: {
+          marginRight: '4px'
+        }
+      }),
       h(
         'span',
         {
@@ -90,6 +99,18 @@ const renderLabel: (option: SelectOption) => VNodeChild = (option) => {
     ],
   );
 };
+
+function isValidGitHubUrl(url: string): boolean {
+  // Regular expression to match GitHub repository URL
+  var gitHubUrlPattern = /^https?:\/\/github.com\/[^\/]+\/[^\/]+/;
+  return gitHubUrlPattern.test(url);
+}
+
+const githubUrlStatus = computed(() => {
+  return isValidGitHubUrl(model.value.githubUrl) ? 'success' : 'error';
+});
+
+
 </script>
 
 <template>
@@ -98,73 +119,35 @@ const renderLabel: (option: SelectOption) => VNodeChild = (option) => {
     <div class="post-heading mb-1">
       <div class="gtext text-2xl font-bold underlined">{{ t('dashboard.addModelAI') }}</div>
     </div>
-    <NForm
-      ref="formRef"
-      :model="model"
-      :rules="rules"
-      size="large"
-    >
+    <NForm ref="formRef" :model="model" :rules="rules" size="large">
       <div>
-        <NGrid
-          :cols="4"
-          :span="24"
-          :x-gap="24"
-        >
+        <NGrid :cols="4" :span="24" :x-gap="24">
 
-        <NFormItemGi
-              :span="12"
-              path="plant"
-              :label="t('dashboard.plant')"
-            >
-              <NSelect
-                filterable
-                trigger="hover"
-                v-model:value="model.plantId"
-                :options="selectOption"
-                :render-label="renderLabel"
-              >
-                <NButton>{{ t('dashboard.plant') }}</NButton>
-              </NSelect>
-            </NFormItemGi>
-    
-        <NFormItemGi
-            :span="12"
-            path="name"
-            :label="t('dashboard.nameModelAI')"
-          >
-            <NInput
-              v-model:value="model.name"
-              :placeholder="t('dashboard.nameModelAI')"
-              clearable
-              @keyup.enter="handleAdded"
-            />
+          <NFormItemGi :span="12" path="plantId" :label="t('dashboard.plant')">
+            <NSelect filterable trigger="hover" v-model:value="model.plantId" :options="selectOption"
+              :render-label="renderLabel">
+              <NButton>{{ t('dashboard.plant') }}</NButton>
+            </NSelect>
           </NFormItemGi>
 
-          <NFormItemGi
-            :span="12"
-            path="githubUrl"
-            :label="t('dashboard.urlGithub')"
-          >
-            <NInput
-              v-model:value="model.githubUrl"
-              :input-props="{ type: 'url' }"
-              :placeholder="t('dashboard.urlGithub')"
-              clearable
-              @keyup.enter="handleAdded"
-            />
+          <NFormItemGi :span="12" path="name" :label="t('dashboard.nameModelAI')">
+            <NInput v-model:value="model.name" :placeholder="t('dashboard.nameModelAI')" clearable
+              @keyup.enter="handleAdded" />
+          </NFormItemGi>
+
+          <NFormItemGi :span="12" path="githubUrl" :label="t('dashboard.urlGithub')">
+
+            <NInput v-model:value="model.githubUrl" :input-props="{ type: 'url' }" @change="isValidGitHubUrl"
+              @input="isValidGitHubUrl" :status="githubUrlStatus"
+              placeholder="https://github.com/shahd1995913/models_world_of_plants_2022/blob/main/Orange_leaves/model"
+              clearable @keyup.enter="handleAdded" />
           </NFormItemGi>
         </NGrid>
       </div>
 
       <div style="display: flex; justify-content: flex-end">
-        <NButton
-          type="primary"
-          style="width:100%;"
-          size="large"
-          :loading="loading"
-          :disabled="isButtonDisabled()"
-          @click="handleAdded"
-        >
+        <NButton type="primary" style="width:100%;" size="large" :loading="loading" :disabled="isButtonDisabled()"
+          @click="handleAdded">
           {{ t('dashboard.addModelAI') }}
         </NButton>
       </div>

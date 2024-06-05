@@ -1,42 +1,51 @@
 <script setup lang='ts'>
-import { ref, onMounted, onUpdated } from 'vue'
+import { ref, onMounted, onUpdated, computed } from 'vue'
 import { NResult, NButton } from 'naive-ui'
 import { t } from '@/locales';
 import { get } from '@/utils/request';
 import Product from './Product.vue'
-const htmlContent = ref('')
+import { useDashboardStore, usePredictionStore } from '@/store'
+const predictionStore = usePredictionStore()
+const products = computed(() => predictionStore.products)
 const loading = ref(true)
-const products = ref([])
+const correctDisease = computed(() => predictionStore.correctDisease)
 async function getProduct(): Promise<void> {
     try {
 
-        const data = {
-            'category': 'مبيدات-حشرية'
+    const data = {
+            'disease_id': correctDisease.value.id
         }
 
-        // const data = {
-        //     'category': 'Clothing'
-        // }
+      
         const response = await get<any>({
-            url: 'product-category/',
+            url: 'product-disease/',
             data
         })
-        products.value = response
-        htmlContent.value = response
-        console.log("plant", response)
+        predictionStore.products = response
+
+        console.log("products", response)
         loading.value = false
     } catch (error: any) {
+        loading.value = false
         console.log("error", error)
         throw error;
-        loading.value = false
     }
 }
 onMounted(async () => {
-    getProduct();
+    if(predictionStore.products.length === 0){
+        getProduct();
+    } else{
+        loading.value = false
+    }
+
 })
 
 onUpdated(async () => {
-    getProduct();
+    if(predictionStore.products.length === 0){
+        getProduct();
+    } else{
+        loading.value = false
+    }
 })
 </script>
 <template>
@@ -47,8 +56,8 @@ onUpdated(async () => {
     </div>
 
 
-    <div v-if="!loading && !products" class="p-4 rounded w-full flex flex-col text-base min-h-[50vh]">
-        <NResult status="info" :title="t('common.sorry')" description="Not found any product">
+    <div v-if="!loading && products.length === 0" class="p-4 rounded w-full flex flex-col text-base min-h-[50vh]">
+        <NResult status="info" :title="t('common.sorry')" :description="t('common.notFoundAnyProduct')">
             <template #footer>
                 <NButton @click="getProduct()" type="primary">
                     {{ t('common.back') }}
@@ -58,7 +67,7 @@ onUpdated(async () => {
         </NResult>
     </div>
 
-    <div v-else class=" grid grid-cols-2 md:grid-cols-3 gap-5">
+    <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-5">
         <template v-for="(product, index) in products">
 
             <Product :row="product" />

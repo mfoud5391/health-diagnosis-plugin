@@ -4,16 +4,17 @@ declare namespace Dashboard {
         id?: string
         plantId?: string
         name: string
-        image_url: string
-        image?: File
-        keyLabel:number 
+        image: string | File 
+        keyLabel: number | null
         description: string
         healthCondition: string
         languageCodes: string[]
-        translationsName:string[]
+        translationsName: string[]
         translationsDescription: string[]
         translationsHealthCondition: string[]
         status: boolean
+        productIds:[]
+        products:[]
         createdAt: string
         updatedAt: string
     }
@@ -23,8 +24,7 @@ declare namespace Dashboard {
         name: string
         languageCodes: string[]
         translations: string[]
-        image_url: string
-        image?: File
+        image: string | File 
         status: boolean
         modelAIGithub?: string
         createdAt: string
@@ -50,7 +50,7 @@ declare namespace Dashboard {
     type DashboardState = {
         listPlants: Plant[]
         currentPlant: Plant
-     
+
         showModelAdd: boolean
         showModelAddDiseases: boolean
         showModelUpdatePlant: boolean
@@ -58,22 +58,22 @@ declare namespace Dashboard {
         showModelAddModelAI: boolean
         listDiseases: Diseases[]
         listModelAI: ModelAI[]
-        statistics:Statistics| null
+        statistics: Statistics | null
 
-        listHistoryUser:HistoryUser[]
+        listHistoryUser: HistoryUser[]
     }
 
 
     type UserDetectionState = {
-        selectedPlant:Plant 
+        selectedPlant: Plant
 
     }
 
     type Statistics = {
-        plants:number
+        plants: number
         diseases: number
-        modelAi:number
-       history:number
+        modelAi: number
+        history: number
 
     }
 
@@ -98,6 +98,6 @@ declare namespace Dashboard {
         stockStatus: string;
         categories: number[];
     }
-    
+
 
 }

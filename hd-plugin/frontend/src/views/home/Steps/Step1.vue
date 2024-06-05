@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { t } from '@/locales';
 import { useMessage, NUpload, UploadCustomRequestOptions, NModal, NButton, NResult, NImage } from 'naive-ui';
-import { useDashboardStore, usePredictionStore } from '@/store'
+import { useAppStore, useDashboardStore, usePredictionStore } from '@/store'
 import axios from 'axios';
 import * as tf from '@tensorflow/tfjs';
 import Tips from './Tips.vue'
@@ -11,6 +11,7 @@ import { baseImageUrl } from '@/utils/request/axios';
 
 import { SvgIcon } from '@/components/common';
 import modelJson from './model.json'
+const appStore = useAppStore()
 const showModal = ref(false)
 const nextStep = ref(false)
 const { isMobile } = useBasicLayout()
@@ -163,7 +164,7 @@ const customRequest = async ({
             console.log('prediction_result_value', predictionStore.correctPredictedProbability?.toFixed(0))
         }
 
-        formData.append('user_id', '1');
+        formData.append('user_id', appStore.userId);
         formData.append('model_id', modelAI.value?.id!);
         if (typeof predictionStore.correctDisease?.id !== "undefined") {
             console.log("predictionStore.correctDisease?.id", predictionStore.correctDisease?.id)
@@ -214,7 +215,13 @@ async function getDataAsync() {
 
 
 onMounted(async () => {
-    getDataAsync();
+    if( currentDiseases.value.length > 0 &&  modelAI.value ){
+        loading.value = false 
+      
+    } else{
+        getDataAsync();
+    }
+  
 })
 
 

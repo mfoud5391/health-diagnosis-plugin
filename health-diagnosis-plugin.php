@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: Health Diagnosis Plugin 
  * Description: A WordPress plugin for health diagnosis.
@@ -38,6 +37,9 @@ function jal_install()
     $table_name_modelai = $wpdb->prefix . 'model_ai';
     $table_name_history = $wpdb->prefix . 'history_user_detection';
     $table_name_translations = $wpdb->prefix . 'translations';
+
+    $table_name_product_disease = $wpdb->prefix . 'product_disease';
+
    // Execute queries
    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     $charset_collate = $wpdb->get_charset_collate();
@@ -131,6 +133,21 @@ function jal_install()
             FOREIGN KEY (model_id) REFERENCES $table_name_modelai(id) ON DELETE CASCADE
         ) $charset_collate;";
         dbDelta($sql_history);
+    }
+
+       // Create the product_disease table
+       if ($wpdb->get_var("SHOW TABLES LIKE '$table_name_product_disease'") != $table_name_product_disease) {
+        $sql_product_disease = "CREATE TABLE $table_name_product_disease (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            disease_id mediumint(9) NOT NULL,
+            product_id bigint(20) UNSIGNED NOT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY (id),
+            FOREIGN KEY (disease_id) REFERENCES $table_name_disease(id) ON DELETE CASCADE,
+            FOREIGN KEY (product_id) REFERENCES {$wpdb->prefix}posts(ID) ON DELETE CASCADE
+        ) $charset_collate;";
+        dbDelta($sql_product_disease);
     }
 
     // Update plugin version
@@ -376,9 +393,6 @@ function jal_install_data() {
 
     }
 
-
-
-
         
 }
 
@@ -398,14 +412,17 @@ function health_diagnosis_plugin_uninstall() {
     $table_name_modelai = $wpdb->prefix . 'model_ai';
     $table_name_history = $wpdb->prefix . 'history_user_detection'; 
     $table_name_translations = $wpdb->prefix . 'translations';
+
+    $table_name_product_disease = $wpdb->prefix . 'product_disease';
     // Drop the tables
 
     $wpdb->query("DROP TABLE IF EXISTS $table_name_history");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_modelai");
-  
+    $wpdb->query("DROP TABLE IF EXISTS $table_name_product_disease");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_disease");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_translations");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_plant");
+
 
 
     // Delete plugin options

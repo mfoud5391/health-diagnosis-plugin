@@ -88,8 +88,8 @@ const pagination = reactive({
 })
 function handleDeleteAction(id: string, type: string) {
   const deleteDialog = dialog.warning({
-    title: t('chat.deleteConfirmation'),
-    content: t('chat.deleteConfirmationMessage'),
+    title: t('common.deleteConfirmation'),
+    content: t('common.deleteConfirmationMessage'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: async () => {
@@ -102,10 +102,10 @@ function handleDeleteAction(id: string, type: string) {
           await dashboardStore.deleteDiseasesAction(id)
         }
 
-        message.success(t('chat.deleteSuccess'));
+        message.success(t('common.deleteSuccess'));
       } catch (error: any) {
         deleteDialog.loading = false
-        message.error(t('chat.deleteFailed'));
+        message.error(t('common.deleteFailed'));
         console.error(error.message)
       } finally {
         deleteDialog.loading = false
@@ -247,7 +247,7 @@ const columns = reactive<DataTableColumns<TableData>>([
   diseasesColumn,
   ModelAIColumn,
   {
-    title: t('research.actions'),
+    title: t('app.actions'),
     key: 'actions',
     align: 'center',
     width: 100,
@@ -360,8 +360,8 @@ function handleCheck(rowKeys: DataTableRowKey[]) {
 
 function deleteSelectedRows() {
   const deleteDialog = dialog.warning({
-    title: t('chat.deleteConfirmation'),
-    content: t('chat.deleteConfirmationMessage'),
+    title: t('common.deleteConfirmation'),
+    content: t('common.deleteConfirmationMessage'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: async () => {
@@ -444,7 +444,7 @@ function deleteSelectedRows() {
       </NButton>
 
       <NButton
-      style="background-color: #208000;"
+      style="background-color: red; color:white;"
         strong
         secondary
         type="error"
@@ -528,7 +528,7 @@ function deleteSelectedRows() {
       :mask-closable=false
       :auto-focus="false"
       preset="card"
-      style="width: 95%; max-width: 640px;"
+      style="width: 95%; max-width: 900px; margin-top:40px; margin-bottom: 40px;"
     >
       <AddDiseases />
     </NModal>
@@ -567,7 +567,7 @@ function deleteSelectedRows() {
       :mask-closable=false
       :auto-focus="false"
       preset="card"
-      style="width: 95%; max-width: 640px;"
+      style="width: 95%; max-width: 900px;  margin-top:40px; margin-bottom: 40px;"
     >
       <UpdateDiseases :row="rowEditDisease!" />
     </NModal>

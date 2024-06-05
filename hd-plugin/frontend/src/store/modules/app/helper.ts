@@ -11,6 +11,7 @@ export interface AppState {
   theme: Theme
   language: Language
   labelPlacement:string
+  userId:string
   
 }
 
@@ -19,7 +20,8 @@ export function defaultSetting(): AppState {
     siderCollapsed: false,
      theme: 'light',
       language: 'en-US',
-      labelPlacement:"top"
+      labelPlacement:"top",
+      userId:""
     }
 }
 

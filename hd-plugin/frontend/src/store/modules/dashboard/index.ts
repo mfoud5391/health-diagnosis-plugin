@@ -7,10 +7,12 @@ function initState(): Dashboard.DashboardState {
     listPlants: [],
     currentPlant: {
       name: '',
-      image_url: '',
+      image: '',
       status: true,
       createdAt: '',
       updatedAt: '',
+      languageCodes: [],
+      translations: []
     },
     showModelAdd: false,
     showModelAddDiseases: false,

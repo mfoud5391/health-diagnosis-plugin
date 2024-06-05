@@ -32,7 +32,9 @@ export default {
     totalDiseases: 'Total Diseases',
     totalModel: 'Total Models',
     totalOperation: 'Total Operations',
-
+    idUser:'ID User',
+    result:'Result',
+    picture:'picture',
   }
   ,
 
@@ -61,7 +63,8 @@ export default {
     diagnosisProgress: 'Diagnosis is in progress',
     description: 'mpower your agricultural endeavors with cutting-edge AI technology designed to revolutionize the way you detect and manage plant diseases. Our system harnesses the power of advanced algorithms and machine learning to provide accurateof various plant ailments. From common fungal infections to elusive viral diseases, our AI-driven platform offers comprehensive coverage, enabling early detection and proactive intervention.',
     healthStatus: "Health status",
-    descriptionOfTheDisease: 'Description Of The Disease'
+    descriptionOfTheDisease: 'Description Of The Disease',
+    actions:'actions',
   },
 
   common: {
@@ -111,7 +114,17 @@ export default {
     historyUsers: 'History Users',
     general: 'General',
     start: 'Start Now',
-    back:'Back'
+    back:'Back',
+    image:'image',
+    state:'state',
+    imageRequired: 'Image required',
+    nameRequired: 'Name required',
+    plantRequired: 'Plant required',
+    deleteConfirmation: 'Delete Confirmation',
+    deleteConfirmationMessage: 'Are you sure you want to delete this item?',
+    searchProducts:'Search Products',
+    products:'Products',
+    notFoundAnyProduct:'not found any product',
 
   },
   setting: {

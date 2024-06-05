@@ -1,13 +1,9 @@
-<script
-    setup
-    lang='ts'
->
+<script setup lang='ts'>
 import { ref, computed, onMounted } from 'vue'
-import { NImage, useMessage, NResult } from 'naive-ui'
+import { NImage, useMessage, NResult,NSkeleton } from 'naive-ui'
 import { t } from '@/locales';
 import { useDashboardStore, usePredictionStore } from '@/store'
 const loading = ref(true)
-
 const notFoundPlant = ref(false)
 const dashboardStore = useDashboardStore()
 const predictionStore = usePredictionStore()
@@ -17,11 +13,10 @@ const plants = computed(() => {
     dashboardStore.listPlants.forEach((plant) => {
         const modelAI = dashboardStore.getListModelAIByIdPlant(plant.id!);
         if (modelAI) {
-       
             listPlants.push(plant)
         }
     })
-   
+
     return listPlants
 
 })
@@ -35,7 +30,7 @@ async function getDataAsync() {
         await dashboardStore.getAllModelAI()
         loading.value = true
         loading.value = false
-        if (plants.value.length <= 0){
+        if (plants.value.length <= 0) {
             notFoundPlant.value = true
         }
     } catch (error: any) {
@@ -48,6 +43,7 @@ async function getDataAsync() {
 onMounted(async () => {
     getDataAsync();
 })
+
 </script>
 
 <template>
@@ -58,30 +54,18 @@ onMounted(async () => {
 
     <div class="flex flex-wrap justify-center  items-center gap-4">
 
-        <div
-            class="spinner mt-8"
-            v-if="loading"
-        ></div>
+        <div class="spinner mt-8" v-if="loading"></div>
 
-        <div
-            v-for="plant in plants"
-            :key="plant.id"
-            @click="setCurrentPlant(plant)"
-            class="flex w-48 h-56 cursor-pointer flex-col  justify-around gap-4 item-center bg-blue-100 px-4 py-2 rounded-lg"
-        >
+        <div v-for="plant in plants" :key="plant.id" @click="setCurrentPlant(plant)"
+            class="flex w-48 h-56 cursor-pointer flex-col  justify-around gap-4 item-center bg-green-100 px-4 py-2 rounded-lg">
 
-            <NImage
-                class="rounded-full mx-auto slide-in-fwd-center"
-                width="100"
-                height="100"
-                lazy
-                :src="plant.image"
-                preview-disabled
-            >
+            <NImage v-if="typeof plant.image === 'string' && plant.image !== ''" class="rounded-full mx-auto slide-in-fwd-center" width="100" height="100" lazy :src="plant.image"
+                preview-disabled>
                 <template #placeholder>
+                    <!-- <NSkeleton  :width="300" height="150px" :sharp="false" size="medium" /> -->
                     <div class="flex items-center justify-center">
-                        <div class="loader1"></div>
-                    </div>
+              <div class="loader1"></div>
+            </div>
                 </template>
             </NImage>
 
@@ -96,12 +80,8 @@ onMounted(async () => {
 
 
     <div v-if="notFoundPlant" class="flex flex-col gap-6 justify-center items-center col-span-2 py-8">
-            <NResult
-    status="info"
-    :title="t('common.sorry')"
-    :description="t('common.notFoundPlant')"
-  >
-  </NResult>
-</div>
+        <NResult status="info" :title="t('common.sorry')" :description="t('common.notFoundPlant')">
+        </NResult>
+    </div>
 
 </template>

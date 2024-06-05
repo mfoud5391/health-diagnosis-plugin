@@ -22,6 +22,10 @@ async function bootstrap() {
   if (rootElement) {
     const lang = rootElement.getAttribute('data-lang')
     const userId = rootElement.getAttribute('data-user-id')
+
+    if (userId ) {
+      appStore.userId = userId
+    }
     if (lang) {
       if( lang === 'ar') {
         appStore.setLanguage('ar-DZ')
@@ -30,8 +34,8 @@ async function bootstrap() {
       }
     
     }
-
-    console.log("lang",lang)
+//console lang
+    console.log("lang1",lang)
   }
   app.mount('#app')
 }

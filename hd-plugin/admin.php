@@ -24,6 +24,9 @@ function health_diagnosis_admin_page()
     exit;
 }
 
+
+
+
 function register_add_plant_endpoint()
 {
     register_rest_route('wphd/v2', '/add-plant', array(
@@ -131,7 +134,7 @@ function add_new_disease($request)
     $image = $_FILES['image'];
     $status = filter_var($request->get_param('status'), FILTER_VALIDATE_BOOLEAN);
     $key_label = intval($request->get_param('key_label'));
-
+    $product_ids = json_decode($request->get_param('product_ids'));
 
     // Validate required fields
     if (empty($plant_id) || empty($translations_name)  || empty($translations_description) || empty($translations_health_condition) || empty($image['tmp_name'])) {
@@ -218,6 +221,23 @@ function add_new_disease($request)
             array('%s', '%s', '%s', '%d', '%s', '%s')
         );
     }
+
+      // Insert into product_disease table
+      $table_name_product_disease = $wpdb->prefix . 'product_disease';
+      foreach ($product_ids as $product_id) {
+          $wpdb->insert(
+              $table_name_product_disease,
+              array(
+                  'disease_id' => $disease_id,
+                  'product_id' => $product_id,
+                  'created_at' => current_time('mysql'),
+                  'updated_at' => current_time('mysql')
+              ),
+              array('%d', '%d', '%s', '%s')
+          );
+      }
+
+      
     return rest_ensure_response(array('id' => $disease_id,  'image' => $image_url));
 }
 
@@ -425,6 +445,7 @@ function register_get_detection_history_endpoint()
 }
 add_action('rest_api_init', 'register_get_detection_history_endpoint');
 
+
 function get_detection_history($request)
 {
     global $wpdb;
@@ -432,17 +453,30 @@ function get_detection_history($request)
     $table_name_history = $wpdb->prefix . 'history_user_detection';
     $table_name_plant = $wpdb->prefix . 'plant_ai';
     $table_name_disease = $wpdb->prefix . 'disease_ai';
+    $table_name_translations = $wpdb->prefix . 'translations';
 
     $upload_dir = wp_get_upload_dir();
     $base_url = $upload_dir['url'];
+    $lang = get_locale();
+    if($lang == 'ar'){
+        $default_language_code = 'ar';
+    }else{
+        $default_language_code = 'en';
+    }
+    // Default language code for translations
+  
 
     // Retrieve detection history with associated plant and disease data
-    $detection_history = $wpdb->get_results("
-        SELECT h.*, p.name AS plant_name, d.name AS disease_name, h.picture AS picture_filename
-        FROM $table_name_history AS h
-        LEFT JOIN $table_name_plant AS p ON h.plant_id = p.id
-        LEFT JOIN $table_name_disease AS d ON h.correct_disease_id = d.id
-    ");
+    $detection_history = $wpdb->get_results($wpdb->prepare("
+        SELECT h.id, h.id_user, h.picture AS picture_filename, h.prediction_result_value, h.created_at,
+               COALESCE(tp.translated_text, p.id) AS plant_name, COALESCE(td.translated_text, d.id) AS disease_name
+        FROM $table_name_history h
+        LEFT JOIN $table_name_plant p ON h.plant_id = p.id
+        LEFT JOIN $table_name_translations tp ON p.id = tp.entity_id AND tp.entity_type = 'plant' AND tp.language_code = %s
+        LEFT JOIN $table_name_disease d ON h.correct_disease_id = d.id
+        LEFT JOIN $table_name_translations td ON d.id = td.entity_id AND td.entity_type = 'disease' AND td.language_code = %s
+        ORDER BY h.created_at DESC
+    ", $default_language_code, $default_language_code));
 
     if ($detection_history) {
         // Iterate through each result and add the full URL for the picture
@@ -475,8 +509,8 @@ function get_all_plants_translate($request)
     $table_name_translations = $wpdb->prefix . 'translations';
 
     // Retrieve all languages from the translations table
-    $languages = $wpdb->get_col("SELECT DISTINCT language_code FROM $table_name_translations");
-
+    // $languages = $wpdb->get_col("SELECT DISTINCT language_code FROM $table_name_translations");
+    $languages = ['en' , 'ar'];
     // Retrieve all plants from the plant_ai table
     $plants_data = $wpdb->get_results("
         SELECT p.id, p.picture, p.status, " . implode(", ", array_map(function ($lang) use ($table_name_translations) {
@@ -525,7 +559,7 @@ add_action('rest_api_init', 'register_get_plants_endpoint');
 
 function get_all_plants($request)
 {
-    global $wpdb;
+    
     global $wpdb;
     $table_name_plant = $wpdb->prefix . 'plant_ai';
     $table_name_translations = $wpdb->prefix . 'translations';
@@ -570,8 +604,7 @@ function get_all_plants($request)
 }
 
 
-function register_get_diseases_endpoint_translate()
-{
+function register_get_diseases_endpoint_translate() {
     register_rest_route('wphd/v2', '/diseases-t', array(
         'methods' => 'GET',
         'callback' => 'get_all_diseases_translate',
@@ -580,22 +613,21 @@ function register_get_diseases_endpoint_translate()
 }
 add_action('rest_api_init', 'register_get_diseases_endpoint_translate');
 
-
-function get_all_diseases_translate($request)
-{
+function get_all_diseases_translate($request) {
     global $wpdb;
     $table_name_disease = $wpdb->prefix . 'disease_ai';
     $table_name_translations = $wpdb->prefix . 'translations';
+    $table_name_product_disease = $wpdb->prefix . 'product_disease';
 
     // Get the plant_id from the request
     $plant_id = $request->get_param('plant_id');
 
-    // Retrieve all languages from the translations table
-    $languages = $wpdb->get_col("SELECT DISTINCT language_code FROM $table_name_translations");
+    // Define the languages
+    $languages = ['en', 'ar'];
 
     // Construct the SQL query with a WHERE clause to filter by plant_id
     $sql = "
-        SELECT d.id, d.plant_id, d.pictures, d.key_label, d.status, " . implode(", ", array_map(function ($lang) use ($table_name_translations) {
+        SELECT d.id, d.plant_id, d.pictures, d.key_label, d.status, GROUP_CONCAT(pd.product_id) AS product_ids, " . implode(", ", array_map(function ($lang) use ($table_name_translations) {
             return "dt_$lang.translated_text AS name_$lang, ddt_$lang.translated_text AS description_$lang, dhct_$lang.translated_text AS health_condition_$lang";
         }, $languages)) . "
         FROM $table_name_disease d
@@ -603,11 +635,14 @@ function get_all_diseases_translate($request)
             return "LEFT JOIN $table_name_translations AS dt_$lang ON d.id = dt_$lang.entity_id AND dt_$lang.entity_type = 'disease' AND dt_$lang.language_code = '$lang'
             LEFT JOIN $table_name_translations AS ddt_$lang ON d.id = ddt_$lang.entity_id AND ddt_$lang.entity_type = 'disease_description' AND ddt_$lang.language_code = '$lang'
             LEFT JOIN $table_name_translations AS dhct_$lang ON d.id = dhct_$lang.entity_id AND dhct_$lang.entity_type = 'disease_health_condition' AND dhct_$lang.language_code = '$lang'";
-        }, $languages));
+        }, $languages)) . "
+        LEFT JOIN $table_name_product_disease AS pd ON d.id = pd.disease_id";
 
     if ($plant_id) {
         $sql .= $wpdb->prepare(" WHERE d.plant_id = %d", $plant_id);
     }
+
+    $sql .= " GROUP BY d.id";
 
     // Retrieve diseases from the disease_ai table
     $diseases_data = $wpdb->get_results($sql);
@@ -623,6 +658,20 @@ function get_all_diseases_translate($request)
             $disease_image = $disease->pictures;
             $disease_status = $disease->status == 1 ? true : false;
             $disease_key_label = $disease->key_label;
+            $product_ids = array_map('intval', explode(',', $disease->product_ids)); // Convert product_ids to an array
+
+            // Fetch product details
+            $products = array();
+            foreach ($product_ids as $product_id) {
+                $product = wc_get_product($product_id);
+                if ($product) {
+                    $products[] = array(
+                        'id' => $product->get_id(),
+                        'name' => $product->get_name(),
+                        'image' => wp_get_attachment_image_url($product->get_image_id(), 'woocommerce_thumbnail')
+                    );
+                }
+            }
 
             $disease_item = array(
                 'id' => $disease_id,
@@ -639,7 +688,9 @@ function get_all_diseases_translate($request)
                 }, $languages),
                 'translationsHealthCondition' => array_map(function ($lang) use ($disease) {
                     return $disease->{"health_condition_$lang"};
-                }, $languages)
+                }, $languages),
+                'product_ids' => $product_ids,
+                'products' => $products // Add product details to the response
             );
             $diseases[] = $disease_item;
         }
@@ -648,6 +699,8 @@ function get_all_diseases_translate($request)
         return array();
     }
 }
+
+
 
 function register_get_diseases_endpoint()
 {
@@ -784,6 +837,46 @@ function get_all_models($request)
         // return new WP_Error('no_models', __('No AI models found.'), array('status' => 404));
     }
 }
+
+
+
+
+
+// function register_get_all_frontend()
+// {
+//     register_rest_route('wphd/v2', '/get-info-frontend', array(
+//         'methods' => 'GET',
+//         'callback' => 'get_info_frontend',
+//         'permission_callback' => '__return_true'
+//     ));
+// }
+// add_action('rest_api_init', 'get_info_frontend');
+
+
+// function get_info_frontend($request)
+// {
+//     $plants =  get_all_plants_translate($request);
+//     $diseases =  get_all_diseases_translate($request);
+    
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -963,13 +1056,13 @@ function edit_disease($request) {
     $translations_name = json_decode($request->get_param('translations_name'));
     $translations_description = json_decode($request->get_param('translations_description'));
     $translations_health_condition = json_decode($request->get_param('translations_health_condition'));
+    $product_ids = json_decode($request->get_param('product_ids'));
 
-    
     $image = isset($_FILES['image']) ? $_FILES['image'] : null;
     $status = filter_var($request->get_param('status'), FILTER_VALIDATE_BOOLEAN);
 
     // Validate required fields
-    if (empty($disease_id) || empty($plant_id) ) {
+    if (empty($disease_id) || empty($plant_id)) {
         return new WP_Error('invalid_data', __('Please provide all required fields.'), array('status' => 400));
     }
 
@@ -992,9 +1085,6 @@ function edit_disease($request) {
     $table_name = $wpdb->prefix . 'disease_ai';
     $data_to_update = array(
         'plant_id' => $plant_id,
-      
-        // 'key_label' => $key_label,
-      
         'status' => $status,
         'updated_at' => current_time('mysql')
     );
@@ -1008,7 +1098,7 @@ function edit_disease($request) {
         $table_name,
         $data_to_update,
         array('id' => $disease_id),
-        array('%s', '%s', '%s', '%s', '%d', '%s'),
+        array('%d', '%d', '%s', '%s'),
         array('%d')
     );
 
@@ -1064,11 +1154,30 @@ function edit_disease($request) {
         );
     }
 
+    // Update product_disease table
+    $table_name_product_disease = $wpdb->prefix . 'product_disease';
+
+    // Delete existing product relationships
+    $wpdb->delete($table_name_product_disease, array('disease_id' => $disease_id), array('%d'));
+
+    // Insert new product relationships
+    foreach ($product_ids as $product_id) {
+        $wpdb->insert(
+            $table_name_product_disease,
+            array(
+                'disease_id' => $disease_id,
+                'product_id' => $product_id,
+                'created_at' => current_time('mysql'),
+                'updated_at' => current_time('mysql')
+            ),
+            array('%d', '%d', '%s', '%s')
+        );
+    }
+
     // Prepare response data
     $response_data = array(
         'plant_id' => $plant_id,
         'id' => $disease_id,
-    
         'status' => $status == 1 ? true : false,
     );
 
@@ -1079,6 +1188,7 @@ function edit_disease($request) {
 
     return rest_ensure_response($response_data);
 }
+
 
 
 

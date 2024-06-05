@@ -88,15 +88,15 @@ const columns = reactive<DataTableColumns<TableData>>([
 
 
   {
-      title: 'ID',
-      key: 'id'
+      title:  t('dashboard.idUser'),
+      key: 'idUser'
     },
     {
-      title: 'Plant',
+      title: t('dashboard.namePlant'),
       key: 'plantName'
     },
     {
-      title: 'picture',
+      title: t('dashboard.picture'),
       key: 'picture',
       render(row: TableData) {
       return h(
@@ -123,48 +123,16 @@ const columns = reactive<DataTableColumns<TableData>>([
     },
 
     {
-      title: 'Result',
+      title: t('dashboard.result'),
       key: 'predictionResultValue'
     },
 
     {
-      title: 'Disease',
+      title: t('dashboard.nameDiseases'),
       key: 'diseaseName'
     },
 
 
-
-  // {
-  //   title: t('research.actions'),
-  //   key: 'actions',
-  //   align: 'center',
-  //   width: 100,
- 
-  //   render(row: TableData) {
-  //     return h(
-  //       'div',
-  //       {
-  //         class: 'flex gap-1'
-  //       },
-  //       [
-        
-
-  //         h(
-  //           NButton,
-  //           {
-  //             strong: true,
-  //             tertiary: true,
-  //             size: 'small',
-  //             loading: loadingActionDelete.value,
-  //             onClick: () => handleDeleteAction(row.id!, 'plant')
-  //           },
-  //           { default: () => h(iconRender({ icon: 'fluent:delete-32-regular', color: 'red' })) }
-  //         ),
-
-  //       ]
-  //     );
-  //   }
-  // },
 
 ]);
 
@@ -273,23 +241,7 @@ function deleteSelectedRows() {
     </div>
 
     <div class="flex gap-2 justify-end items-center mb-2">
-<!-- 
-      <NButton
-        strong
-        secondary
-        type="error"
-        :disabled="checkedRowKeysRef.length > 0 ? false : true"
-        @click="deleteSelectedRows"
-      >
-        <div class="flex gap-2 items-center">
-          <SvgIcon
-            icon="fluent:delete-32-regular"
-            class=" text-base"
-          />
-          <div class="hidden md:block">{{ t('common.delete') }}</div>
-        </div>
 
-      </NButton> -->
 
  </div>
     </div>

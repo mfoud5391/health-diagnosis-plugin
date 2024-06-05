@@ -7,6 +7,7 @@ import {
 } from 'naive-ui'
 import { t } from '@/locales';
 import ListPlants from './plants/ListPlants.vue'
+
 import Dashboard from './dashboard/index.vue'
 import HistoryUser from './dashboard/HistoryUser.vue'
 </script>
@@ -18,6 +19,7 @@ import HistoryUser from './dashboard/HistoryUser.vue'
      <Dashboard/>
     </NTabPane>
     <NTabPane name="plants" :tab="t('dashboard.plants')">
+
   <ListPlants/>
     </NTabPane>
   

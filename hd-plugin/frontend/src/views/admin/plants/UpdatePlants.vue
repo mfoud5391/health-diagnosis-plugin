@@ -43,8 +43,8 @@ const model = ref<Dashboard.Plant>({
 });
 
 const rules = {
-    name: [{ required: true, message: t('university.nameRequired'), trigger: ['input', 'blur'] }],
-    image: [{ required: true, message: t('university.imageRequired'), trigger: ['input', 'blur'] }],
+    name: [{ required: true, message: t('common.nameRequired'), trigger: ['input', 'blur'] }],
+    image: [{ required: true, message: t('common.imageRequired'), trigger: ['input', 'blur'] }],
 };
 
 async function handleUpdate() {
@@ -127,7 +127,7 @@ false
           <NFormItemGi
             :span="12"
             path="image"
-            :label="t('university.image')"
+            :label="t('common.image')"
           >
             <NUpload
             accept="image/*"
@@ -159,7 +159,7 @@ false
           <NFormItemGi
             :span="12"
             path="state"
-            :label="t('university.state')"
+            :label="t('common.state')"
           >
             <NSwitch
               v-model:value="model.status"

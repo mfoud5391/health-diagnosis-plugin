@@ -10,9 +10,15 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const name = computed(() => row.value.translations[language.name === 'ar-DZ' ? 0 : 1])
+const name = computed(() => row.value.translations[language.value.name === 'ar-DZ' ? 1 : 0])
 const row = computed(() => props.row)
-const imageUrl = computed(() => row.value.image)
+const imageUrl = computed(() => {
+  if (typeof row.value.image === 'string' && row.value.image !== '') {
+    return row.value.image;
+  }
+  // If the conditions are not met, you might want to return a default image URL or null
+  return false; // Or null, or any other default value
+});
 
 console.log(props.row)
 const badgeType = row.value.status ? 'success' : 'error';
@@ -25,6 +31,7 @@ const { isMobile } = useBasicLayout()
   :class="isMobile ? 'flex-col  ' : '' ">
     <NBadge
       dot
+      v-if="imageUrl"
       :processing=false
       :type='badgeType'
     >
